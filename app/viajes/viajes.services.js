@@ -33,41 +33,35 @@ exports.getViaje = async (id) => {
 }
 
 exports.postViaje = async (viaje) => {
-    let client;
-   
-    try {
-        client = await mariaDB.getConnection();
-        var query = "INSERT INTO n_viajes (cod, titulo, subtitulo, cuerpo, inicio, fin, precio, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        var datos = ["9FX95", viaje.titulo, viaje.subtitulo, viaje.cuerpo, new Date(), new Date(), viaje.precio, new Date(), new Date()];
-        await client.query(query, datos, (error, results) => {
-            if (error) {
-                throw error;
-            }
-            console.log(results);
+    mariaDB.getConnection()
+        .then((conection) => {
+            conection.beginTransaction()
+                .then(() => {
+                    var viajeQuery = "INSERT INTO n_viajes (cod, titulo, subtitulo, cuerpo, inicio, fin, precio, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    var viajeDatos = ["9FX95", viaje.titulo, viaje.subtitulo, viaje.cuerpo, new Date(), new Date(), viaje.precio, new Date(), new Date()];
+                    conection.query(viajeQuery, viajeDatos)
+                        .then((rows) => {
+                            var idViaje = rows.insertId;
+                            console.log(rows);
+                            var userQuery = "INSERT INTO n_viajes_usuarios (id_usuario, id_viaje, created_date, modified_date) VALUES (?, ?, ?, ?)";
+                            var userDatos = [1, idViaje, new Date(), new Date()];
+                            conection.query(userQuery, userDatos)
+                                .then(() => {
+                                    conection.commit();
+                                })
+                                .catch(() => {
+                                    conection.rollback();
+                                })
+                                .finally(() => {
+                                    conection.end();
+                                });
+                        })
+                        .catch(() => {
+                            conection.rollback();
+                        }); 
+                });   
+        })          
+        .catch(() => {
+            throw error;   
         });
-    }
-    catch (error) {
-        await client.end();
-        throw error;
-    }
-    finally {
-        await client.end();
-    }
-
-    
-
-    /*'INSERT INTO n_viajes (cod, titulo, subtitulo, cuerpo, inicio, fin, precio, created_date, modified_date) VALUES ("9FX95", $1, $2, $3, $4, $5, $6, $7)';
-        'Viaje a EEUU.', 
-        'Viaje a Nueva York para verano.', 
-        'Se buscan persona agradable y con buen rollo para hacer un viaje a Nueva York en las vacaciones de verano.', 
-        '2019-08-10 00:00:00.000', 
-        '2019-08-18 00:00:00.000', 
-        '1400.00', 
-        '2019-02-27 21:47:46.000', 
-        '2019-02-27 21:47:46.000'
-    );'
-    
-    'SELECT id FROM u_usuarios WHERE email = "' + email + '";'
-    
-    'INSERT INTO n_viajes_usuarios (id_usuario, id_viaje, created_data, modified_date) VALUES (1, 1,"2019-02-27 21:47:46.000", "2019-02-27 21:47:46.000");'*/
 }
