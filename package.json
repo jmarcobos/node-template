@@ -1,7 +1,7 @@
 {
-  "name": "portfolio",
+  "name": "node-template",
   "version": "1.0.0",
-  "description": "Back-End para mi portfolio personal.",
+  "description": "A Node template for news projects.",
   "main": "index.js",
   "scripts": {
     "test": "test"
