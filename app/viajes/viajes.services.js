@@ -33,31 +33,33 @@ exports.getViaje = async (id) => {
 }
 
 exports.postViaje = async (viaje) => {
-    mariaDB.getConnection()
+    return mariaDB.getConnection()
         .then((conection) => {
-            conection.beginTransaction()
+            return conection.beginTransaction()
                 .then(() => {
                     var viajeQuery = "INSERT INTO n_viajes (cod, titulo, subtitulo, cuerpo, inicio, fin, precio, created_date, modified_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     var viajeDatos = ["9FX95", viaje.titulo, viaje.subtitulo, viaje.cuerpo, new Date(), new Date(), viaje.precio, new Date(), new Date()];
-                    conection.query(viajeQuery, viajeDatos)
+                    return conection.query(viajeQuery, viajeDatos)
                         .then((rows) => {
                             var idViaje = rows.insertId;
-                            console.log(rows);
                             var userQuery = "INSERT INTO n_viajes_usuarios (id_usuario, id_viaje, created_date, modified_date) VALUES (?, ?, ?, ?)";
                             var userDatos = [1, idViaje, new Date(), new Date()];
-                            conection.query(userQuery, userDatos)
+                            return conection.query(userQuery, userDatos)
                                 .then(() => {
                                     conection.commit();
+                                    return rows;
                                 })
                                 .catch(() => {
                                     conection.rollback();
                                 })
                                 .finally(() => {
                                     conection.end();
+                                    conection.release();
                                 });
                         })
                         .catch(() => {
                             conection.rollback();
+                            conection.release();
                         }); 
                 });   
         })          
