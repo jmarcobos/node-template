@@ -67,3 +67,21 @@ exports.postViaje = async (viaje) => {
             throw error;   
         });
 }
+
+exports.getMisViajes = async (user) => {
+    let client;
+    try {
+        client = await mariaDB.getConnection();
+        console.log(user);
+        var query = 'SELECT v.* FROM n_viajes v, n_viajes_usuarios s, u_usuarios u WHERE v.id = s.id_viaje AND s.id_usuario = u.id AND u.email = ?';
+        var dates = [user];
+        return await client.query(query, dates);
+    }
+    catch (error) {
+        await client.end();
+        throw error;
+    }
+    finally {
+        await client.end();
+    }
+}

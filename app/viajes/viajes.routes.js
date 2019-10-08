@@ -8,5 +8,6 @@ const ViajesCtrl = require('./viajes.controllers');
 viajes.route('/').get(ViajesCtrl.getViajes);
 viajes.route('/').post(ViajesCtrl.postViaje);
 viajes.route('/:id').get(ViajesCtrl.getViaje);
+viajes.route('/user/:id').get(ViajesCtrl.getMisViajes);
 
 module.exports = viajes;
