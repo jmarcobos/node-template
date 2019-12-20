@@ -2,11 +2,13 @@
 
 const mariaDB = require('./../../config/initializers/database');
 
+//let request = require('request');
+
 exports.getViajes = async () => {
     let client;
     try {
         client = await mariaDB.getConnection();
-        return await client.query('SELECT * FROM n_viajes v, n_viajes_destinos d, m_paises p, m_ciudades c WHERE v.id = d.id_viaje and d.id_pais = p.id and c.id = d.id_ciudad;');
+        return await client.query('SELECT v.id, v.titulo, v.subtitulo, v.inicio, v.precio, p.nombre, c.nombre FROM n_viajes v, n_viajes_destinos d, m_paises p, m_ciudades c WHERE v.id = d.id_viaje and d.id_pais = p.id and c.id = d.id_ciudad;');
     }
     catch (error) {
         await client.end();
@@ -18,10 +20,17 @@ exports.getViajes = async () => {
 }
 
 exports.getViaje = async (id) => {
+
     let client;
     try {
         client = await mariaDB.getConnection();
-        return await client.query('SELECT * FROM portfolio.n_viajes WHERE id = ' + id);
+        var sql = "SELECT * FROM n_viajes WHERE id = ?; SELECT u.id, u.email FROM u_usuarios u, n_viajes_usuarios v WHERE u.id = v.id_usuario AND v.id_viaje = ?;";
+        var datos = [id, id];
+        return client.query(sql, datos)
+            .then((resultados) => {
+                console.log(resultados);
+                return resultados;
+            });   
     }
     catch (error) {
         await client.end();
@@ -43,7 +52,7 @@ exports.postViaje = async (viaje) => {
                         .then((rows) => {
                             var idViaje = rows.insertId;
                             var userQuery = "INSERT INTO n_viajes_usuarios (id_usuario, id_viaje, created_date, modified_date) VALUES (?, ?, ?, ?)";
-                            var userDatos = [1, idViaje, new Date(), new Date()];
+                            var userDatos = [1, idViaje, new Date(), new Date()];   
                             return conection.query(userQuery, userDatos)
                                 .then(() => {
                                     conection.commit();
@@ -72,7 +81,6 @@ exports.getMisViajes = async (user) => {
     let client;
     try {
         client = await mariaDB.getConnection();
-        console.log(user);
         var query = 'SELECT v.* FROM n_viajes v, n_viajes_usuarios s, u_usuarios u WHERE v.id = s.id_viaje AND s.id_usuario = u.id AND u.email = ?';
         var dates = [user];
         return await client.query(query, dates);

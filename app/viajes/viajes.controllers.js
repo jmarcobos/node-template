@@ -16,7 +16,7 @@ exports.getViaje = async (request, response, next) => {
     try {
         let viaje = await getViaje(request.params.id);
         if (viaje.length > 0) {
-        return response.status(200).json(viaje[0]);
+            return response.status(200).json(viaje);
         } else {
             return response.status(204).json({ status: 204, data: usuario, message: "No Content" });    
         }

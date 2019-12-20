@@ -7,7 +7,8 @@ const conexion = mariaDb.createPool({
     user:'root', 
     password: 'azucar',
     database: 'portfolio',
-    connectionLimit: 5
+    connectionLimit: 5,
+    multipleStatements: true
 });
 
 module.exports = conexion;
