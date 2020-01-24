@@ -2,8 +2,6 @@
 
 const mariaDB = require('./../../config/initializers/database');
 
-//let request = require('request');
-
 exports.getViajes = async () => {
     let client;
     try {
@@ -24,11 +22,12 @@ exports.getViaje = async (id) => {
     let client;
     try {
         client = await mariaDB.getConnection();
-        var sql = "SELECT * FROM n_viajes WHERE id = ?; SELECT u.id, u.email FROM u_usuarios u, n_viajes_usuarios v WHERE u.id = v.id_usuario AND v.id_viaje = ?;";
-        var datos = [id, id];
+        let viaje = "SELECT * FROM n_viajes WHERE id = ?;";
+        let usuarios = "SELECT u.id, d.nombre, d.apellido1, d.apellido2, u.email, v.creador FROM u_usuarios u, u_datos_personales d, n_viajes_usuarios v WHERE u.id = d.id_usuario AND u.id = v.id_usuario AND v.id_viaje = ?;";
+        let sql = viaje + usuarios;
+        let datos = [id, id];
         return client.query(sql, datos)
             .then((resultados) => {
-                console.log(resultados);
                 return resultados;
             });   
     }
